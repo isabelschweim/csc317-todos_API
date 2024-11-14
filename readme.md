@@ -51,3 +51,6 @@ curl http://localhost:3000/todos?completed=true
 
 #### Retrieve only uncompleted to-do items
 curl http://localhost:3000/todos?completed=false
+
+## Bonus:
+Extend the extend-todos-API HW to work with a SQlite database instead of hard-coding the todos list.
