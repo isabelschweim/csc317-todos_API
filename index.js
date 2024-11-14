@@ -9,15 +9,16 @@ app.use(express.json());
 // Question 1: Add a "Priority" Field to the To-Do API
 // Sample data
 let todos = [
-  { id: 1, task: "Learn Node.js", completed: false },
-  { id: 2, task: "Build a REST API", completed: false }
+  { id: 1, task: "Learn Node.js", completed: false, priority: "medium" },
+  { id: 2, task: "Build a REST API", completed: false, priority: "medium" }
 ];
 
 // GET /todos - Retrieve all to-do items
+/*
 app.get('/todos', (req, res) => {
   res.json(todos);
 });
-
+*/
 
 /* 
 Q.3"
@@ -25,6 +26,17 @@ GET /todos - Retrieve all to-do items or filter by completed status.
 after completing this part, you need to comment out the GET end point 
 already implemented here to test this new GET endpoint! 
 */
+app.get('/todos', (req, res) => {
+  const completedParam = req.query.completed;
+  
+  if (completedParam !== undefined) {
+    const isCompleted = completedParam === 'true';
+    const filteredTodos = todos.filter(todo => todo.completed === isCompleted);
+    return res.json(filteredTodos);
+  }
+  
+  res.json(todos);
+});
 
 
 
@@ -33,10 +45,30 @@ app.post('/todos', (req, res) => {
   const newTodo = {
     id: todos.length + 1,
     task: req.body.task,
-    completed: false
+    completed: false,
+    priority: req.body.priority || "medium"  // Default to "medium" if not specified
   };
   todos.push(newTodo);
   res.status(201).json(newTodo);
+});
+
+
+/*
+Question 2: Implement a "Complete All" Endpoint
+example usage: 
+curl -X PUT http://localhost:3000/todos/complete-all
+
+Defined the /todos/complete-all route before /todos/:id to avoid conflicts.
+*/
+app.put('/todos/complete-all', (req, res) => {
+  if (!todos) {
+    return res.status(404).send("To-Do item not found");
+  }
+  todos.forEach(todo => {
+    todo.completed = true;
+  });
+  res.json({ message: "All to-do items marked as completed" });
+  res.status(200).send();
 });
 
 // PUT /todos/:id - Update an existing to-do item
@@ -48,14 +80,9 @@ app.put('/todos/:id', (req, res) => {
   }
   todo.task = req.body.task || todo.task;
   todo.completed = req.body.completed !== undefined ? req.body.completed : todo.completed;
+  todo.priority = req.body.priority || todo.priority;  // Allow updating priority
   res.json(todo);
 });
-
-/*
-Question 2: Implement a "Complete All" Endpoint
-example usage: 
-curl -X PUT http://localhost:3000/todos/complete-all
-*/
 
 
 // DELETE /todos/:id - Delete a to-do item
